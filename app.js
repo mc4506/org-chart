@@ -10,9 +10,115 @@ const outputPath = path.join(OUTPUT_DIR, "team.html");
 
 const render = require("./lib/htmlRenderer");
 
+console.log("=================================");
+console.log("Enter Employee Info to generate");
+console.log("an HTML page of Employee Contacts");
+console.log("=================================");
 
-// Write code to use inquirer to gather information about the development team members,
-// and to create objects for each team member (using the correct classes as blueprints!)
+let existManager = false;
+
+const employeeQuestions = [{
+        type: "input",
+        message: "Enter name of Employee.",
+        name: "name",
+        validate: input => {
+            const validName = /^[a-zA-Z]+([\ A-Za-z\'\-]+)*/i;
+            if (validName.test(input)) return true;
+            return "Please enter a valid name.";
+        },
+    },
+    {
+        type: "list",
+        message: "Select employee title.",
+        choices: response => {
+            if (existManager) {
+                return ["Engineer", "Intern"];
+            } else {
+                existManager = true;
+                return ["Manager", "Engineer", "Intern"];
+            };
+        },
+        name: "title",
+    },
+    {
+        type: "input",
+        message: "Enter employee ID number.",
+        name: "id",
+        validate: input => {
+            const validID = /^[\d]+/;
+            if (validID.test(input)) return true;
+            return "Please enter a valid ID number (0...9).";
+        },
+    },
+    {
+        type: "input",
+        message: "Enter employee's email address.",
+        name: "email",
+        validate: input => {
+            const validEmail = /^[a-zA-Z\d\-_.]+@[a-zA-Z\d]+\.[a-zA-Z\d]{2,}$/i;
+            if (validEmail.test(input)) return true;
+            return "Please enter a valid email address.";
+        }
+    },
+    {
+        type: "input",
+        message: "Enter the office number.",
+        name: "office",
+        validate: input => {
+            const validOffice = /^[\da-zA-Z\-._]+/;
+            if (validOffice.test(input)) return true;
+            return "Please enter a valid office number.";
+        },
+        when: response => (response.title === "Manager") ? true : false,
+    },
+    {
+        type: "input",
+        message: "Enter employee's Github username.",
+        name: "github",
+        validate: input => {
+            const validStr = /^[a-zA-Z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i;
+            if (validStr.test(input)) return true;
+            return "Please enter a valid Github username";
+        },
+        when: response => (response.title === "Engineer") ? true : false,
+    },
+    {
+        type: "input",
+        message: "Enter intern's school name.",
+        name: "school",
+        validate: input => {
+            const validStr = /^[a-zA-Z]+([\ A-Za-z\'\-]+)*/;
+            if (validStr.test(input)) return true;
+            return "Please enter a valid name";
+        },
+        when: response => (response.title === "Intern") ? true : false,
+    },
+    {
+        type: "confirm",
+        message: "Do you want to enter another employee?",
+        name: "addEmployee",
+    }
+];
+
+const employees = [];
+
+const addEmployees = function() {
+    let employee = {};
+    inquirer.prompt(employeeQuestions).then(({name, title, id, email, office, github, school, addEmployee}) => {
+        if(title === "Manager") {
+            employee = new Manager(name, id, email, office);
+        } else if (title === "Engineer") {
+            employee = new Engineer(name, id, email, github);
+        } else {
+            employee = new Intern(name, id, email, school);
+        }
+        employees.push(employee);
+        addEmployee ? addEmployees() : console.log(employees);
+    });
+};
+
+addEmployees();
+
 
 // After the user has input all employees desired, call the `render` function (required
 // above) and pass in an array containing all employee objects; the `render` function will
