@@ -100,11 +100,12 @@ const employeeQuestions = [{
     }
 ];
 
-const employees = [];
+const team =[]
 
-const addEmployees = function() {
+const addEmployees = async () => {
     let employee = {};
-    inquirer.prompt(employeeQuestions).then(({name, title, id, email, office, github, school, addEmployee}) => {
+    await inquirer.prompt(employeeQuestions)
+    .then(({name, title, id, email, office, github, school, addEmployee}) => {
         if(title === "Manager") {
             employee = new Manager(name, id, email, office);
         } else if (title === "Engineer") {
@@ -112,13 +113,32 @@ const addEmployees = function() {
         } else {
             employee = new Intern(name, id, email, school);
         }
-        employees.push(employee);
-        addEmployee ? addEmployees() : console.log(employees);
+        team.push(employee);
+        if(addEmployee) {
+            // console.log(team);
+            return addEmployees();
+        }
+        else {
+            return team;
+        }
     });
 };
 
-addEmployees();
+async function generateHTML() {
+    try {
+        await addEmployees();
+        const renderedHTML = render(team);
+        console.log(renderedHTML);
+        await fs.writeFile(outputPath, renderedHTML, err => {
+            if (err) throw err;
+            else console.log(`Sucessfully saved HTML to ${outputPath}`);
+        });
+    } catch(err) {
+        console.log(err);
+    }
+};
 
+generateHTML();
 
 // After the user has input all employees desired, call the `render` function (required
 // above) and pass in an array containing all employee objects; the `render` function will
