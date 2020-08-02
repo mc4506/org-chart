@@ -103,6 +103,7 @@ const employeeQuestions = [{
 // async function to add employees to a "team" array.
 const addEmployees = async (team) => {
     let employee = {};
+    console.log("\n---------------------------------");
     // wait for inquirer responses to employee questions.
     await inquirer.prompt(employeeQuestions)
     .then(({name, title, id, email, office, github, school, addEmployee}) => {
