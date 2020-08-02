@@ -15,7 +15,7 @@ console.log("Enter Employee Info to generate");
 console.log("an HTML page of Employee Contacts");
 console.log("=================================");
 
-let existManager = false;
+let existManager = false; // keep track if Manager has been added
 
 const employeeQuestions = [{
         type: "input",
@@ -31,7 +31,7 @@ const employeeQuestions = [{
         type: "list",
         message: "Select employee title.",
         choices: response => {
-            if (existManager) {
+            if (existManager) { // only one Manager per team
                 return ["Engineer", "Intern"];
             } else {
                 existManager = true;
@@ -100,10 +100,10 @@ const employeeQuestions = [{
     }
 ];
 
-const team =[]
-
-const addEmployees = async () => {
+// async function to add employees to a "team" array.
+const addEmployees = async (team) => {
     let employee = {};
+    // wait for inquirer responses to employee questions.
     await inquirer.prompt(employeeQuestions)
     .then(({name, title, id, email, office, github, school, addEmployee}) => {
         if(title === "Manager") {
@@ -115,8 +115,7 @@ const addEmployees = async () => {
         }
         team.push(employee);
         if(addEmployee) {
-            // console.log(team);
-            return addEmployees();
+            return addEmployees(team);
         }
         else {
             return team;
@@ -124,11 +123,12 @@ const addEmployees = async () => {
     });
 };
 
+// async function to render and write html to file
 async function generateHTML() {
     try {
-        await addEmployees();
-        const renderedHTML = render(team);
-        console.log(renderedHTML);
+        const myTeam = [];
+        await addEmployees(myTeam); // wait for myTeam to be populated
+        const renderedHTML = render(myTeam); // generate HTML
         await fs.writeFile(outputPath, renderedHTML, err => {
             if (err) throw err;
             else console.log(`Sucessfully saved HTML to ${outputPath}`);
@@ -139,23 +139,3 @@ async function generateHTML() {
 };
 
 generateHTML();
-
-// After the user has input all employees desired, call the `render` function (required
-// above) and pass in an array containing all employee objects; the `render` function will
-// generate and return a block of HTML including templated divs for each employee!
-
-// After you have your html, you're now ready to create an HTML file using the HTML
-// returned from the `render` function. Now write it to a file named `team.html` in the
-// `output` folder. You can use the variable `outputPath` above target this location.
-// Hint: you may need to check if the `output` folder exists and create it if it
-// does not.
-
-// HINT: each employee type (manager, engineer, or intern) has slightly different
-// information; write your code to ask different questions via inquirer depending on
-// employee type.
-
-// HINT: make sure to build out your classes first! Remember that your Manager, Engineer,
-// and Intern classes should all extend from a class named Employee; see the directions
-// for further information. Be sure to test out each class and verify it generates an
-// object with the correct structure and methods. This structure will be crucial in order
-// for the provided `render` function to work! ```
